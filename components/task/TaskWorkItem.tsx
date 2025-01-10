@@ -9,7 +9,7 @@ import {
 } from "@/schema";
 import useTask from "@/hooks/useTask";
 import { TaskOrder } from "./TaskOrder";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFetchWithAuth } from "@/hooks/useFetchWithAuth";
 import { hostAPI } from "@/utils/global";
 import { useObject, useQuery, useRealm } from "@realm/react";
@@ -173,6 +173,15 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
         setLoading(false);
       });
   };
+
+  const order = useMemo(() => {
+    const orders = allOrders.filtered(
+      "_id=$0",
+      new BSON.ObjectId(taskWorker?.orderId)
+    );
+
+    return orders[0];
+  }, []);
 
   function onPauseTask(task: TaskSchema): void {
     const orders = allOrders.filtered(
@@ -349,7 +358,8 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
                         dayjs(taskWorker.to),
                         "day",
                         "[]"
-                      ) //activeTaskFromStore !== null ||
+                      ) ||
+                      !order?.stolyarComplete //activeTaskFromStore !== null ||
                     }
                     onPress={() => onProcessTask(task)}
                   ></UIButton>

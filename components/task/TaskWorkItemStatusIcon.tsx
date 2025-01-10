@@ -15,6 +15,7 @@ import { TaskWorkerNotify } from "./TaskWorkerNotify";
 import { TaskWorkerNotifyTimer } from "./TaskWorkerNotifyTimer";
 import { TaskWorkerNotifyActiveTaskNo } from "./TaskWorkerNotifyActiveTaskNo";
 import TaskIcon from "./TaskIcon";
+import { TaskWorkerNotifyActiveTaskNoModal } from "./TaskWorkerNotifyActiveTaskNoModal";
 
 export type TaskWorkItemStatusIconProps = {};
 
@@ -77,7 +78,8 @@ export function TaskWorkerItemStatusIcon({}: TaskWorkItemStatusIconProps) {
         )}
         {activeTaskFromStore == null && workTimeFromStore !== null && (
           <View className="absolute bottom-8 -left-36 w-80 p-0 rounded-md">
-            <TaskWorkerNotifyActiveTaskNo />
+            {/* <TaskWorkerNotifyActiveTaskNo /> */}
+            <TaskWorkerNotifyActiveTaskNoModal />
           </View>
         )}
       </View>
