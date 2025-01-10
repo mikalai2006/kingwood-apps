@@ -6,12 +6,16 @@ import { useTranslation } from "react-i18next";
 import { useAppSelector } from "@/store/hooks";
 import { user } from "@/store/storeSlice";
 import UIButton from "@/components/ui/UIButton";
-import TaskWorkList from "@/components/task/TaskWorkList";
+import TaskWorkerTabs from "@/components/task/TaskWorkerTabs";
+import { useState } from "react";
+import TaskWorkerList from "@/components/task/TaskWorkerList";
 
 export default function FollowScreen() {
   const userFromStore = useAppSelector(user);
 
   const { t } = useTranslation();
+
+  const [objectId, setObjectId] = useState("");
 
   return (
     <View className="flex-1 bg-s-200 dark:bg-s-950">
@@ -20,8 +24,16 @@ export default function FollowScreen() {
         {/* {userFromStore?.postObject?.name === "Монтажник" ? (
           <TaskMontajWorkerList />
         ) : ( */}
-        <TaskWorkList />
-        {/* )} */}
+        {/* <Text>{JSON.stringify(objectId)}</Text> */}
+        <View>
+          <TaskWorkerTabs setObjectId={setObjectId} objectId={objectId} />
+        </View>
+        <View className="flex-1">
+          {objectId != "" && (
+            <TaskWorkerList key={objectId} objectId={objectId} />
+          )}
+          {/* )} */}
+        </View>
         <UIButton
           type="secondary"
           text={t("button.completedTask")}

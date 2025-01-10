@@ -13,6 +13,7 @@ export type UIButtonProps = TouchableOpacityProps & {
   loading?: boolean;
   icon?: keyof typeof icons;
   twClass?: string;
+  textClass?: string;
   children?: any;
   className?: string;
   type: "secondary" | "primary" | "link" | "danger" | "success";
@@ -76,8 +77,8 @@ export default function UIButton(props: UIButtonProps) {
         break;
     }
 
-    return result + ` ${props.twClass}`;
-  }, [props.disabled, props.twClass, props.type]);
+    return props.textClass ? props.textClass : result;
+  }, [props.disabled, props.twClass, props.type, props.textClass]);
 
   // const classIcon = React.useMemo(() => {
   //   let result = "";

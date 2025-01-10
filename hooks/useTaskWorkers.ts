@@ -113,6 +113,10 @@ const useTaskWorkers = (props: IUseTaskWorkersProps) => {
                         ...x.order,
                         _id: new BSON.ObjectId(x.order.id),
                       },
+                      object: {
+                        ...x.object,
+                        _id: new BSON.ObjectId(x.object?.id),
+                      },
                     };
                   }
                 );
@@ -159,6 +163,13 @@ const useTaskWorkers = (props: IUseTaskWorkersProps) => {
                           realm.create(
                             "OrderSchema",
                             listDataForRealm[i].order,
+                            UpdateMode.Modified
+                          );
+                        }
+                        if (listDataForRealm[i].object) {
+                          realm.create(
+                            "ObjectsSchema",
+                            listDataForRealm[i].object,
                             UpdateMode.Modified
                           );
                         }

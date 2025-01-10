@@ -24,6 +24,7 @@ import {
 } from "@/schema";
 import useAuth from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { wsAPI } from "@/utils/global";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -130,7 +131,7 @@ export default function WidgetEvents() {
         throw new Error(t("general:httpError.notConnect"));
       }
 
-      const _socket = new WebSocket("ws://localhost:8000/api/v1/ws/room1");
+      const _socket = new WebSocket(wsAPI);
       _socket.onopen = function () {
         _socket.send(
           JSON.stringify({

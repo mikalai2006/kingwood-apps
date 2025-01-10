@@ -2,18 +2,13 @@ import { Tabs } from "expo-router";
 
 import React, { useEffect, useMemo } from "react";
 
-import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/utils/Colors";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useColorScheme } from "nativewind";
-import { IconAwesome5 } from "@/components/navigation/IconAwesome5";
-import { IconAwesome6 } from "@/components/navigation/IconAwesome6";
 import { Text, View } from "react-native";
 import UserTabInfo from "@/components/user/UserTabInfo";
 
 import { activeTaskWorker, modeTheme, user } from "@/store/storeSlice";
 import { useAppSelector } from "@/store/hooks";
-import FocusStatusBar from "@/components/FocusStatusBar";
 import { setMode } from "@/utils/mode";
 import SIcon from "@/components/ui/SIcon";
 import BadgeTabLots from "@/components/badge/BadgeTabLots";
@@ -214,9 +209,9 @@ export default function TabLayout() {
               // },
               tabBarIcon: ({ color, focused }) =>
                 !userFromStore?.images ? (
-                  <IconAwesome6
-                    name={focused ? "user" : "user"}
-                    size={20}
+                  <SIcon
+                    path={focused ? "iPerson" : "iPerson"}
+                    size={25}
                     color={color}
                   />
                 ) : (
