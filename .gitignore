@@ -21,5 +21,5 @@ expo-env.d.ts
 # @end expo-cli
 
 swap-c21ab-firebase-adminsdk-ycsae-c867fe4025.json
-./android/app/google-services.json
+android/
 google-services.json
