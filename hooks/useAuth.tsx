@@ -216,7 +216,7 @@ export default function useAuth() {
     };
   });
 
-  const onLogout = () => {
+  const onLogout = async () => {
     dispatch(setTokens(null));
     dispatch(setUser(null));
   };

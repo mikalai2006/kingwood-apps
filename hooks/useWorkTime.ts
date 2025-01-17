@@ -7,20 +7,21 @@ import { useFetchWithAuth } from "./useFetchWithAuth";
 import { useAppSelector } from "@/store/hooks";
 import { activeLanguage } from "@/store/storeSlice";
 import { useTranslation } from "react-i18next";
-import { IAddress, IFilterSort, IResponseData } from "@/types";
 import { useFocusEffect } from "expo-router";
 import { useRealm } from "@realm/react";
 import { BSON, UpdateMode } from "realm";
+import { IWorkTime } from "@/types";
 
-export interface IUseAddressesProps {
-  userId?: string | undefined;
-  sort?: IFilterSort;
+export interface IUseWorkTimeProps {
+  id?: string[];
+  workerId?: string[];
+  date?: string;
+  from?: string;
+  to?: string;
 }
 
-const useAddresses = (props: IUseAddressesProps) => {
+const UseWorkTime = (props: IUseWorkTimeProps, deps: any[]) => {
   const { t } = useTranslation();
-
-  const { userId, sort } = props;
 
   const realm = useRealm();
 
@@ -34,10 +35,12 @@ const useAddresses = (props: IUseAddressesProps) => {
   useFocusEffect(
     React.useCallback(() => {
       let ignore = false;
-      const onFindOffers = async () => {
+      const onFindItems = async () => {
         try {
+          console.log("UseWorkTime: ", props);
+
           await onFetchWithAuth(
-            `${hostAPI}/address/find?` +
+            `${hostAPI}/work_time/populate?` +
               new URLSearchParams({
                 lang: activeLanguageFromStore?.code || "en",
               }),
@@ -47,26 +50,17 @@ const useAddresses = (props: IUseAddressesProps) => {
                 Accept: "application/json",
                 "Content-Type": "application/json",
               },
-              // node(id: "${featureFromStore?.id}") {
               body: JSON.stringify({
-                userId: userId || undefined,
-                sort: sort
-                  ? [
-                      {
-                        key: sort.key,
-                        value: sort.value,
-                      },
-                    ]
-                  : [],
+                ...props,
               }),
             }
           )
             .then((r) => r.json())
-            .then((response: IResponseData<IAddress>) => {
+            .then((response) => {
               if (!ignore) {
-                // console.log("UseAddresses response: ", response);
+                // console.log("UseWorkTime response: ", response);
 
-                const responseData = response;
+                const responseData: IWorkTime[] = response.data;
                 if (!responseData) {
                   // dispatch(setActiveNode(null));
                   // setProducts([]);
@@ -76,9 +70,7 @@ const useAddresses = (props: IUseAddressesProps) => {
                   return;
                 }
 
-                const responseItems = responseData.data;
-
-                const listDataForRealm = responseItems.map((x) => {
+                const listDataForRealm = responseData.map((x: IWorkTime) => {
                   return {
                     ...x,
                     _id: new BSON.ObjectId(x.id),
@@ -95,32 +87,79 @@ const useAddresses = (props: IUseAddressesProps) => {
                         i++
                       ) {
                         realm.create(
-                          "AddressSchema",
-                          {
-                            ...listDataForRealm[i],
-                          },
+                          "WorkTimeSchema",
+                          listDataForRealm[i],
                           UpdateMode.Modified
                         );
+
+                        // if (listDataForRealm[i].object) {
+                        //   realm.create(
+                        //     "ObjectsSchema",
+                        //     {
+                        //       ...listDataForRealm[i].object,
+                        //       _id: new BSON.ObjectId(
+                        //         listDataForRealm[i].objectId
+                        //       ),
+                        //     },
+                        //     UpdateMode.Modified
+                        //   );
+                        // }
+
+                        // if (listDataForRealm[i].workers) {
+                        //   for (
+                        //     let j = 0,
+                        //       total = listDataForRealm[i].workers.length;
+                        //     j < total;
+                        //     j++
+                        //   ) {
+                        //     realm.create(
+                        //       "TaskWorkerSchema",
+                        //       {
+                        //         ...listDataForRealm[i].workers[j],
+                        //         _id: new BSON.ObjectId(
+                        //           listDataForRealm[i].workers[j].id
+                        //         ),
+                        //       },
+                        //       UpdateMode.Modified
+                        //     );
+
+                        //     if (listDataForRealm[i].workers[j].worker) {
+                        //       realm.create(
+                        //         "UserSchema",
+                        //         {
+                        //           ...listDataForRealm[i].workers[j].worker,
+                        //           _id: new BSON.ObjectId(
+                        //             listDataForRealm[i].workers[j].worker.id
+                        //           ),
+                        //         },
+                        //         UpdateMode.Modified
+                        //       );
+                        //     }
+                        //   }
+                        // }
                       }
                     } catch (e) {
-                      console.log("UseAddresses error: ", e);
+                      console.log("UseWorkTime error: ", e);
                     }
                   });
                 }
+                // console.log("productsFromRealm: ", localOffersMap);
                 // setProducts(responseProductsData);
 
-                setTimeout(() => {
-                  setLoading(false);
-                }, 100);
                 // console.log('activeMarker=', response);
                 // dispatch(setActiveNode(responseNode));
               }
             })
             .catch((e) => {
+              // setTimeout(() => {
+              //   setLoading(false);
+              // }, 300);
+              throw e;
+            })
+            .finally(() => {
               setTimeout(() => {
                 setLoading(false);
               }, 300);
-              throw e;
             });
         } catch (e: any) {
           // ToastAndroid.showWithGravity(
@@ -135,13 +174,13 @@ const useAddresses = (props: IUseAddressesProps) => {
 
       if (!ignore) {
         // setTimeout(onGetNodeInfo, 100);
-        onFindOffers();
+        onFindItems();
       }
 
       return () => {
         ignore = true;
       };
-    }, []) //productId, userId, sort
+    }, [...deps])
   );
 
   return {
@@ -150,4 +189,4 @@ const useAddresses = (props: IUseAddressesProps) => {
   };
 };
 
-export default useAddresses;
+export default UseWorkTime;

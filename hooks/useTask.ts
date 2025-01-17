@@ -65,7 +65,8 @@ const useTask = (props: IUseTaskProps) => {
               if (!ignore) {
                 // console.log("UseTask response: ", response);
 
-                if (!response) {
+                const responseData: ITask[] = response.data;
+                if (!responseData) {
                   // dispatch(setActiveNode(null));
                   // setProducts([]);
                   setTimeout(() => {
@@ -73,8 +74,6 @@ const useTask = (props: IUseTaskProps) => {
                   }, 300);
                   return;
                 }
-
-                const responseData: ITask[] = response.data;
 
                 const listDataForRealm = responseData.map((x: ITask) => {
                   return {

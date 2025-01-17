@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "swapland",
-    "slug": "swapland",
+    "name": "kingwood",
+    "slug": "kingwood",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "swapland",
+    "scheme": "kingwood",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#381d12"
     },
     "ios": {
       "supportsTablet": true,
@@ -21,16 +21,27 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.swapland",
-      "userInterfaceStyle": "automatic",
-      "googleServicesFile": "./google-services.json"
+      "package": "com.anonymous.kingwood",
+      "userInterfaceStyle": "automatic"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": ["expo-router", "expo-asset"],
+    "plugins": [
+      "expo-router",
+      "expo-asset",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification.png",
+          "color": "#ffffff",
+          "defaultChannel": "default",
+          "enableBackgroundRemoteNotifications": true
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     },

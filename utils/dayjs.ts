@@ -7,12 +7,15 @@ import utc from "dayjs/plugin/utc";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import "dayjs/locale/ru";
 import isBetween from "dayjs/plugin/isBetween";
+import localeData from "dayjs/plugin/localeData";
+import isToday from "dayjs/plugin/isToday";
 // import "dayjs/locale/en";
 // import "dayjs/locale/pl";
 // import "dayjs/locale/uk";
 // import "dayjs/locale/de";
 // import "dayjs/locale/fr";
-
+dayjs.extend(isToday);
+dayjs.extend(localeData);
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
@@ -22,3 +25,7 @@ dayjs.extend(isBetween);
 dayjs.extend(utc);
 
 export default dayjs;
+
+export const formatDate = "DD.MM.YYYY";
+export const formatDateTime = "DD.MM.YYYY HH:mm:ss";
+export const formatTime = "HH:mm:ss";

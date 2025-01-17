@@ -7,12 +7,15 @@ import {
   setLanguages,
   langCode,
   languages,
+  setFinancyFilter,
+  financyFilter,
 } from "@/store/storeSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import useFetch from "@/hooks/useFetch";
 import useLanguage from "@/hooks/useLanguage";
 import { useRealm } from "@realm/react";
 import { BSON, UpdateMode } from "realm";
+import dayjs from "@/utils/dayjs";
 
 export const WidgetInitApp = () => {
   const { onFetch } = useFetch();
@@ -22,6 +25,7 @@ export const WidgetInitApp = () => {
   const dispatch = useAppDispatch();
   const realm = useRealm();
   const activeLanguageFromStore = useAppSelector(activeLanguage);
+  const financyFilterFromStore = useAppSelector(financyFilter);
 
   const activeLangCode = useAppSelector(langCode);
   // console.log('activeLangCode=', activeLangCode);
@@ -55,6 +59,22 @@ export const WidgetInitApp = () => {
       }
     } else {
       onChangeLocale("ru");
+    }
+
+    // set default finance filter.
+    if (!financyFilterFromStore?.year) {
+      const [month, monthText, year] = dayjs(new Date())
+        .locale("ru")
+        .format("M,MMMM,YYYY")
+        .split(",");
+      dispatch(
+        setFinancyFilter({
+          month: +month,
+          monthIndex: +month - 1,
+          monthText: monthText,
+          year: +year,
+        })
+      );
     }
   };
 

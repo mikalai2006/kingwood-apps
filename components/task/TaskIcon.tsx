@@ -1,5 +1,5 @@
 import { Animated } from "react-native";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Easing } from "react-native-reanimated";
 import SIcon from "../ui/SIcon";
 import { Colors } from "@/utils/Colors";
@@ -22,19 +22,19 @@ const TaskIcon = (props: ITaskIconProps) => {
     new BSON.ObjectId(props.statusId)
   );
 
-  const spinValue = new Animated.Value(0);
+  const spinValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // First set up animation
     Animated.loop(
       Animated.timing(spinValue, {
         toValue: 1,
-        duration: 3000,
+        duration: 4000,
         easing: Easing.linear, // Easing is an additional import from react-native
         useNativeDriver: true, // To make use of native driver for performance
       })
     ).start();
-  });
+  }, []);
 
   // Next, interpolate beginning and end values (in this case 0 and 1)
   const spin = spinValue.interpolate({

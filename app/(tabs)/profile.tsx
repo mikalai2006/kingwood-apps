@@ -5,7 +5,7 @@ import { Text, View, ScrollView } from "react-native";
 // import * as Linking from "expo-linking";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { tokens, user } from "@/store/storeSlice";
+import { setActiveTaskWorker, tokens, user } from "@/store/storeSlice";
 import UIButton from "@/components/ui/UIButton";
 import useAuth from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,6 +21,7 @@ import { useObject } from "@realm/react";
 import { PostSchema } from "@/schema";
 import { BSON } from "realm";
 import dayjs from "@/utils/dayjs";
+import { useTaskWorkerUtils } from "@/hooks/useTaskWorkerUtils";
 
 export default function TabProfileScreen() {
   const dispatch = useAppDispatch();
@@ -31,6 +32,16 @@ export default function TabProfileScreen() {
   const tokensFromStore = useAppSelector(tokens);
 
   const { onLogout } = useAuth();
+
+  const { onEndWorkTime } = useTaskWorkerUtils();
+
+  const logout = async () => {
+    await onEndWorkTime();
+
+    dispatch(setActiveTaskWorker(null));
+
+    onLogout();
+  };
 
   const post = useObject(PostSchema, new BSON.ObjectId(userFromStore?.postId));
 
@@ -95,9 +106,10 @@ export default function TabProfileScreen() {
                     {t(`birthday`)}
                   </Text>
                   <Text className="text-lg font-bold text-p-800 dark:text-p-200">
-                    {dayjs(userFromStore.birthday, "DD.MM.YYYY").format(
-                      "DD MMMM YYYY"
-                    )}
+                    {userFromStore.birthday &&
+                      dayjs(userFromStore.birthday, "DD.MM.YYYY").format(
+                        "DD MMMM YYYY"
+                      )}
                   </Text>
                 </View>
 
@@ -114,7 +126,7 @@ export default function TabProfileScreen() {
                   <UIButton
                     type="link"
                     onPress={() => {
-                      router.push("/(tabs)/order/archive");
+                      router.push("/(tabs)/order/completed");
                     }}
                   >
                     <View className="flex-row gap-4">
@@ -151,7 +163,7 @@ export default function TabProfileScreen() {
               </Card> */}
               <View className="mt-4">
                 <Card>
-                  <UIButton type="link" onPress={onLogout}>
+                  <UIButton type="link" onPress={logout}>
                     <View className="flex flex-row items-center gap-4">
                       <Text className="text-red-800 dark:text-red-200 text-center text-xl">
                         Выйти из аккаунта

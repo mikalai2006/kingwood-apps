@@ -20,6 +20,7 @@ import { user } from "@/store/storeSlice";
 import SIcon from "@/components/ui/SIcon";
 import BadgeTabQuestion from "@/components/badge/BadgeTabQuestion";
 import BadgeTabMessage from "@/components/badge/BadgeTabMessage";
+import BadgeTabNotify from "@/components/badge/BadgeTabNotify";
 
 const { Navigator } = createMaterialTopTabNavigator();
 
@@ -56,6 +57,17 @@ export default function Layout() {
               tabBarIcon: ({ color, focused }) => (
                 <View className="absolute top-4 right-3">
                   <BadgeTabQuestion />
+                </View>
+              ),
+            }}
+          />
+          <MaterialTopTabs.Screen
+            name="notify"
+            options={{
+              title: "Push",
+              tabBarIcon: ({ color, focused }) => (
+                <View className="absolute top-4 right-3">
+                  <BadgeTabNotify />
                 </View>
               ),
             }}

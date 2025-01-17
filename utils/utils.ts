@@ -56,3 +56,11 @@ export const getNoun = (
   }
   return five;
 };
+
+export const addStartNull = (num: number | undefined) => {
+  return typeof num != "undefined"
+    ? num > 9
+      ? num.toString()
+      : "0" + num
+    : num;
+};

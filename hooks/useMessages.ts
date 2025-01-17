@@ -79,7 +79,7 @@ const useMessages = (props: IuseMessagesProps) => {
               body: JSON.stringify({
                 userId: userId || undefined,
                 productId: productId?.length ? productId : undefined,
-                roomId: roomId && roomId.length > 0 ? roomId : undefined,
+                roomId: roomId && roomId?.length > 0 ? roomId : undefined,
                 sort: sort
                   ? [
                       {
@@ -116,7 +116,7 @@ const useMessages = (props: IuseMessagesProps) => {
                 });
 
                 // console.log("listDataForRealm: ", listDataForRealm);
-                if (listDataForRealm.length) {
+                if (listDataForRealm?.length) {
                   realm.write(() => {
                     try {
                       for (

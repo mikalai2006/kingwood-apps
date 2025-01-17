@@ -63,15 +63,14 @@ const usePost = (props: IUsePostProps) => {
               if (!ignore) {
                 // console.log("UsePost response: ", response);
 
-                if (!response) {
+                const responseData: IPost[] = response.data;
+                if (!responseData) {
                   // dispatch(setActiveNode(null));
                   setTimeout(() => {
                     setLoading(false);
                   }, 300);
                   return;
                 }
-
-                const responseData: IPost[] = response.data;
 
                 const listDataForRealm = responseData.map((x: IPost) => {
                   return {

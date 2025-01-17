@@ -64,7 +64,8 @@ const useOrders = (props: IUseOrderProps) => {
               if (!ignore) {
                 // console.log("useProducts response: ", response);
 
-                if (!response) {
+                const responseOrdersData: IOrder[] = response.data;
+                if (!responseOrdersData) {
                   // dispatch(setActiveNode(null));
                   // setProducts([]);
                   setTimeout(() => {
@@ -72,8 +73,6 @@ const useOrders = (props: IUseOrderProps) => {
                   }, 300);
                   return;
                 }
-
-                const responseOrdersData: IOrder[] = response.data;
 
                 const listDataForRealm = responseOrdersData.map((x: IOrder) => {
                   return {
@@ -84,7 +83,7 @@ const useOrders = (props: IUseOrderProps) => {
                 });
 
                 // console.log("listDataForRealm: ", listDataForRealm);
-                if (listDataForRealm.length) {
+                if (listDataForRealm?.length) {
                   realm.write(() => {
                     try {
                       for (

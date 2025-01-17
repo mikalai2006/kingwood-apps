@@ -63,15 +63,15 @@ const useObjects = (props: IuseObjectsProps) => {
               if (!ignore) {
                 // console.log("useObjects response: ", response);
 
-                if (!response) {
+                const responseData: IObject[] = response.data;
+
+                if (!responseData) {
                   // dispatch(setActiveNode(null));
                   setTimeout(() => {
                     setLoading(false);
                   }, 300);
                   return;
                 }
-
-                const responseData: IObject[] = response.data;
 
                 const listDataForRealm = responseData.map((x: IObject) => {
                   return {

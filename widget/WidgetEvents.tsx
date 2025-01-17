@@ -24,7 +24,10 @@ import {
 } from "@/schema";
 import useAuth from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
-import { wsAPI } from "@/utils/global";
+import { hostAPI, wsAPI } from "@/utils/global";
+import { useFetchWithAuth } from "@/hooks/useFetchWithAuth";
+
+import { useErrContext } from "@/components/ErrContext";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -42,6 +45,7 @@ export default function WidgetEvents() {
   const userFromStore = useAppSelector(user);
 
   const dispatch = useAppDispatch();
+  const { onFetchWithAuth } = useFetchWithAuth();
 
   const usersFromRealm = useQuery(UserSchema);
   const ordersFromRealm = useQuery(OrderSchema);
@@ -63,9 +67,37 @@ export default function WidgetEvents() {
   const notificationListener = useRef<Notifications.Subscription>();
   const responseListener = useRef<Notifications.Subscription>();
 
+  const onSetExpoPushToken = async (token: string) => {
+    console.log("userFromStore: ", userFromStore?.id);
+    if (userFromStore?.id) {
+      await onFetchWithAuth(`${hostAPI}/auth/${userFromStore?.userId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          pushToken: token.toString(),
+        }),
+      })
+        .then((res) => res.json())
+        .then((res: any) => {
+          return res;
+          // try {
+          //   console.log("onSetExpoPushToken res: ", res);
+          // } catch (e) {
+          //   console.log("onSetExpoPushToken error: ", e);
+          // }
+        })
+        .catch((e) => {
+          console.log("onSetExpoPushToken Error", e);
+          throw e;
+        });
+      setExpoPushToken(token);
+    } else {
+      return null;
+    }
+  };
+
   useEffect(() => {
     registerForPushNotificationsAsync().then(
-      (token) => token && setExpoPushToken(token)
+      (token) => token && onSetExpoPushToken(token)
     );
 
     if (Platform.OS === "android") {
@@ -114,6 +146,8 @@ export default function WidgetEvents() {
     }
   }, []);
 
+  const { setErr } = useErrContext();
+
   useEffect(() => {
     const onInitSocket = async () => {
       if (!tokensFromStore?.access_token) {
@@ -141,6 +175,14 @@ export default function WidgetEvents() {
         );
         console.log("Open websocket: ", tokensFromStore?.access_token);
       };
+
+      _socket.onclose = function () {
+        console.log("Close socket!");
+        console.log(new Error("error.closeSocket"));
+
+        setErr(new Error("error.closeSocket"));
+      };
+
       _socket.onmessage = function (event) {
         console.log("event.data: ", event.data);
         const data: IWsMessage = JSON.parse(event.data);

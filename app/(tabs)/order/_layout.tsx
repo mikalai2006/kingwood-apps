@@ -61,7 +61,7 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
-        name="archive"
+        name="completed"
         options={{ headerShown: true, title: t("title.archiveOrder") }}
       />
     </Stack>

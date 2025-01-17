@@ -24,6 +24,7 @@ import { BSON } from "realm";
 import { transparent } from "tailwindcss/colors";
 import { TaskWorkerItemStatusIcon } from "@/components/task/TaskWorkItemStatusIcon";
 import { useTranslation } from "react-i18next";
+import BadgeTabNotify from "@/components/badge/BadgeTabNotify";
 
 export default function TabLayout() {
   const { colorScheme, setColorScheme } = useColorScheme();
@@ -37,12 +38,10 @@ export default function TabLayout() {
   );
 
   const userFromStore = useAppSelector(user);
-
-  // if (userFromStore?.id) {
+  // if (userFromStore) {
   //   // const { messagesRooms } = useMessagesRooms({
   //   //   userId: userFromStore?.id,
   //   // });
-
   //   useTaskStatus({});
   //   usePost({});
   //   useObjects({});
@@ -63,7 +62,7 @@ export default function TabLayout() {
     setColorScheme(modeThemeFromStore);
   }, []);
 
-  return (
+  return userFromStore ? (
     <View className="flex-1 bg-s-200 dark:bg-s-950">
       {/* <View className="">
         <TaskWorkerNotify />
@@ -170,6 +169,7 @@ export default function TabLayout() {
                   colorScheme === "dark" ? Colors.s[900] : Colors.s[100],
                 borderWidth: 7,
                 padding: 10,
+                zIndex: 100,
               },
               tabBarIcon: ({ color, focused }) => (
                 // <SIcon
@@ -196,6 +196,7 @@ export default function TabLayout() {
                     color={color}
                   />
                   {/* <BadgeTabMessage /> */}
+                  <BadgeTabNotify />
                 </View>
               ),
             }}
@@ -222,5 +223,5 @@ export default function TabLayout() {
         </Tabs>
       </View>
     </View>
-  );
+  ) : null;
 }

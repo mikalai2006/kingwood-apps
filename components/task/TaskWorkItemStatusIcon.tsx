@@ -51,7 +51,10 @@ export function TaskWorkerItemStatusIcon({}: TaskWorkItemStatusIconProps) {
       {taskStatus?._id ? (
         <View>
           {taskStatus?.icon && (
-            <TaskIcon statusId={taskStatus._id.toString()} />
+            <TaskIcon
+              key={taskStatus._id.toString()}
+              statusId={taskStatus._id.toString()}
+            />
           )}
         </View>
       ) : (
@@ -72,7 +75,7 @@ export function TaskWorkerItemStatusIcon({}: TaskWorkItemStatusIconProps) {
             />
           </View>
         ) : (
-          <View className="absolute bottom-8 -left-36 w-80 p-0 rounded-md">
+          <View className="absolute bottom-2 -left-36 w-80 p-0 rounded-md">
             <TaskWorkerNotify short />
           </View>
         )}

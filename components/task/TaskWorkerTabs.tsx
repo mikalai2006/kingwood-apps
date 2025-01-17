@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import React, { useMemo } from "react";
 
 import { FlatList, ScrollView } from "react-native-gesture-handler";
@@ -8,7 +8,7 @@ import { user } from "@/store/storeSlice";
 import { useQuery } from "@realm/react";
 import { TaskWorkerSchema } from "@/schema";
 import { SSkeleton } from "../ui/SSkeleton";
-import { TaskWorkerItem } from "./TaskWorkItem";
+import { TaskWorkerItem } from "./TaskWorkerItem";
 import dayjs from "@/utils/dayjs";
 import TaskNotFound from "./TaskNotFound";
 import { ObjectsSchema } from "@/schema/ObjectsSchema";
@@ -60,12 +60,13 @@ const TaskWorkerTabs = (props: TaskWorkerTabsProps) => {
     <ScrollView horizontal className="flex p-4">
       <View className="flex-row gap-2 h-12">
         {isLoading ? (
-          [1, 2, 3, 4, 5].map((item) => (
-            <View key={item.toString()} className="flex-auto w-20">
-              <SSkeleton className="flex-1 bg-white dark:bg-s-900" />
-            </View>
-          ))
-        ) : objectsForTask.length ? (
+          <ActivityIndicator size={30} />
+        ) : // [1, 2, 3, 4, 5].map((item) => (
+        //   <View key={item.toString()} className="flex-auto w-20">
+        //     <SSkeleton className="flex-1 bg-white dark:bg-s-900" />
+        //   </View>
+        // ))
+        objectsForTask.length ? (
           objectsForTask.map((item) => (
             <View
               key={item?._id.toString()}
@@ -73,6 +74,7 @@ const TaskWorkerTabs = (props: TaskWorkerTabsProps) => {
             >
               <UIButton
                 type="link"
+                disabled={item?._id.toString() == props.objectId}
                 // {
                 //   item?._id.toString() == props.objectId
                 //     ? "primary"
@@ -83,11 +85,11 @@ const TaskWorkerTabs = (props: TaskWorkerTabsProps) => {
                 className={
                   item?._id.toString() == props.objectId
                     ? "bg-white dark:bg-s-600 p-3 m-0 rounded-lg"
-                    : "bg-white dark:bg-s-900 p-3 m-0 rounded-lg"
+                    : "bg-s-100 dark:bg-s-900 p-3 m-0 rounded-lg"
                 }
                 textClass={
                   item?._id.toString() == props.objectId
-                    ? "px-2 text-xl leading-6 text-s-800 dark:text-white leading-5"
+                    ? "px-2 text-xl leading-6 text-s-950 dark:text-white leading-5"
                     : "px-2 text-xl leading-6 text-s-500 dark:text-s-400 leading-5"
                 }
                 onPress={() => {

@@ -2,13 +2,12 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "./store";
 import {
   AppState,
+  IFinancyFilter,
   ILang,
   IRole,
-  ITaskMontajWorker,
-  ITaskMontajWorkerPopulate,
-  ITaskWorker,
   ITaskWorkerPopulate,
   IUser,
+  IWorkHistory,
   IWorkTime,
   TTokenInput,
 } from "@/types";
@@ -24,6 +23,13 @@ const initialState: AppState = {
   users: {},
   activeTaskWorker: null,
   workTime: null,
+  workHistory: null,
+  financyFilter: {
+    month: 0,
+    monthText: "",
+    year: 0,
+    monthIndex: 0,
+  },
 };
 
 // Приведенная ниже функция называется thunk и позволяет нам выполнять асинхронную логику. Это
@@ -117,6 +123,14 @@ export const storeSlice = createSlice({
       // console.log("setWorkTimeId: ", action.payload);
       state.workTime = action.payload;
     },
+    setWorkHistory: (state, action: PayloadAction<IWorkHistory | null>) => {
+      // console.log("setTaskHistory: ", action.payload);
+      state.workHistory = action.payload;
+    },
+    setFinancyFilter: (state, action: PayloadAction<IFinancyFilter>) => {
+      // console.log("setFinancyFilter: ", action.payload);
+      state.financyFilter = action.payload;
+    },
   },
   // Поле `extraReducers` позволяет срезу обрабатывать действия, определенные в другом месте,
   // включая действия, сгенерированные createAsyncThunk или другими слайсами.
@@ -145,6 +159,8 @@ export const {
   setUsers,
   setActiveTaskWorker,
   setWorkTime,
+  setWorkHistory,
+  setFinancyFilter,
 } = storeSlice.actions;
 // Функция ниже называется селектором и позволяет нам выбрать значение из
 // штат. Селекторы также могут быть определены встроенными, где они используются вместо
@@ -160,5 +176,7 @@ export const users = (state: RootState) => state.store.users;
 export const activeTaskWorker = (state: RootState) =>
   state.store.activeTaskWorker;
 export const workTime = (state: RootState) => state.store.workTime;
+export const workHistory = (state: RootState) => state.store.workHistory;
+export const financyFilter = (state: RootState) => state.store.financyFilter;
 
 export default storeSlice.reducer;

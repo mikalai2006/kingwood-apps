@@ -62,7 +62,8 @@ const useTaskStatus = (props: IUseTaskStatusProps) => {
               if (!ignore) {
                 // console.log("UseTaskStatus response: ", response);
 
-                if (!response) {
+                const responseData: ITaskStatus[] = response.data;
+                if (!responseData) {
                   // dispatch(setActiveNode(null));
                   // setProducts([]);
                   setTimeout(() => {
@@ -70,8 +71,6 @@ const useTaskStatus = (props: IUseTaskStatusProps) => {
                   }, 300);
                   return;
                 }
-
-                const responseData: ITaskStatus[] = response.data;
 
                 const listDataForRealm = responseData.map((x: ITaskStatus) => {
                   return {

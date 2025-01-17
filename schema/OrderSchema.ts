@@ -13,9 +13,12 @@ export class OrderSchema extends Realm.Object<OrderSchema> {
   stolyarComplete?: number;
   malyarComplete?: number;
   goComplete?: number;
+  dateStart?: string;
   dateOtgruzka?: string;
   montajComplete?: number;
+  status!: number;
 
+  year?: number;
   createdAt!: string;
   updatedAt!: string;
 
@@ -35,9 +38,12 @@ export class OrderSchema extends Realm.Object<OrderSchema> {
       stolyarComplete: "int?",
       malyarComplete: "int?",
       goComplete: "int?",
+      dateStart: "string?",
       dateOtgruzka: "string?",
       montajComplete: "int?",
+      status: "int",
 
+      year: "int?",
       createdAt: { type: "string", optional: true },
       updatedAt: { type: "string", optional: true },
     },

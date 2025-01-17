@@ -93,7 +93,7 @@ const useQuestions = (props: IuseQuestionsProps) => {
                 };
               });
 
-              if (listDataForRealm.length) {
+              if (listDataForRealm?.length) {
                 realm.write(() => {
                   try {
                     for (

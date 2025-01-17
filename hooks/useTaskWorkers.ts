@@ -76,7 +76,8 @@ const useTaskWorkers = (props: IUseTaskWorkersProps) => {
               if (!ignore) {
                 console.log("useTaskWorkers response: ", response.data.length);
 
-                if (!response) {
+                const responseTaskWorkersData: ITaskWorker[] = response.data;
+                if (!responseTaskWorkersData) {
                   // dispatch(setActiveNode(null));
                   // setProducts([]);
                   setTimeout(() => {
@@ -85,10 +86,7 @@ const useTaskWorkers = (props: IUseTaskWorkersProps) => {
                   return;
                 }
 
-                setItems(response.data);
-
-                const responseTaskWorkersData: ITaskWorkerPopulate[] =
-                  response.data;
+                setItems(responseTaskWorkersData);
 
                 const listDataForRealm = responseTaskWorkersData.map(
                   (x: ITaskWorkerPopulate) => {

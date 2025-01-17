@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 
 import { FlatList } from "react-native-gesture-handler";
 import { useAppSelector } from "@/store/hooks";
@@ -12,7 +12,7 @@ import {
 } from "@/schema";
 import { useMemo } from "react";
 import useTaskWorkers from "@/hooks/useTaskWorkers";
-import { TaskWorkerItem } from "@/components/task/TaskWorkItem";
+import { TaskWorkerItem } from "@/components/task/TaskWorkerItem";
 import { SSkeleton } from "@/components/ui/SSkeleton";
 
 export default function FollowScreen() {
@@ -62,13 +62,14 @@ export default function FollowScreen() {
       {/* <Text>{JSON.stringify(tasks)}</Text> */}
 
       {isLoading ? (
-        <View className="flex p-2">
-          {[1, 2, 3, 4, 5].map((item) => (
-            <View key={item.toString()} className="flex-auto h-64 pb-4 px-2">
-              <SSkeleton className="flex-1 bg-white dark:bg-s-900" />
-            </View>
-          ))}
-        </View>
+        // <View className="flex p-2">
+        //   {[1, 2, 3, 4, 5].map((item) => (
+        //     <View key={item.toString()} className="flex-auto h-64 pb-4 px-2">
+        //       <SSkeleton className="flex-1 bg-white dark:bg-s-900" />
+        //     </View>
+        //   ))}
+        // </View>
+        <ActivityIndicator size={30} />
       ) : (
         <FlatList
           data={taskWorkers}

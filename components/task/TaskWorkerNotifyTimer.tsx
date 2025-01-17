@@ -6,6 +6,7 @@ import { useQuery } from "@realm/react";
 import { WorkTimeSchema } from "@/schema";
 import { useMemo } from "react";
 import { workTime } from "@/store/storeSlice";
+import { TaskWorkerTime } from "./TaskWorkerTime";
 
 export type TaskWorkerNotifyTimerProps = {
   className?: string;
@@ -32,13 +33,14 @@ export function TaskWorkerNotifyTimer({
   });
 
   return (
-    <Text className={`${className}`}>
-      {hours}
-      {!short ? t("time.hours") + " " : ":"}
-      {minutes}
-      {!short ? t("time.minutes") + " " : ":"}
-      {seconds}
-      {!short ? t("time.seconds") + " " : ""}
-    </Text>
+    <TaskWorkerTime time={time} className={className} short={short} />
+    // <Text className={`${className}`}>
+    //   {hours}
+    //   {!short ? t("time.hours") + " " : ":"}
+    //   {minutes}
+    //   {!short ? t("time.minutes") + " " : ":"}
+    //   {seconds}
+    //   {!short ? t("time.seconds") + " " : ""}
+    // </Text>
   );
 }

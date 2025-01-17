@@ -4,18 +4,26 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
 import { useAppSelector } from "@/store/hooks";
-import { user } from "@/store/storeSlice";
+import { activeTaskWorker, user } from "@/store/storeSlice";
 import UIButton from "@/components/ui/UIButton";
 import TaskWorkerTabs from "@/components/task/TaskWorkerTabs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TaskWorkerList from "@/components/task/TaskWorkerList";
 
 export default function FollowScreen() {
   const userFromStore = useAppSelector(user);
 
+  const activeTaskWorkerFromStore = useAppSelector(activeTaskWorker);
+
   const { t } = useTranslation();
 
   const [objectId, setObjectId] = useState("");
+
+  useEffect(() => {
+    if (!objectId && activeTaskWorkerFromStore?.objectId) {
+      setObjectId(activeTaskWorkerFromStore.objectId);
+    }
+  }, []);
 
   return (
     <View className="flex-1 bg-s-200 dark:bg-s-950">
@@ -29,9 +37,11 @@ export default function FollowScreen() {
           <TaskWorkerTabs setObjectId={setObjectId} objectId={objectId} />
         </View>
         <View className="flex-1">
-          {objectId != "" && (
-            <TaskWorkerList key={objectId} objectId={objectId} />
-          )}
+          {
+            objectId != "" ? (
+              <TaskWorkerList key={objectId} objectId={objectId} />
+            ) : null //<TaskObjectIdNotFound />
+          }
           {/* )} */}
         </View>
         <UIButton
@@ -40,7 +50,7 @@ export default function FollowScreen() {
           icon="iChevronRight"
           startText
           onPress={() => {
-            router.push("/(tabs)/order/archive");
+            router.push("/(tabs)/order/completed");
           }}
         />
       </SafeAreaView>

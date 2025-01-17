@@ -2,6 +2,7 @@ import { View, Text } from "react-native";
 import React from "react";
 import { useQuery } from "@realm/react";
 import { MessageSchema } from "@/schema/MessageSchema";
+import { NotifySchema } from "@/schema";
 
 const BadgeTabMessage = () => {
   const newMessage = useQuery(MessageSchema, (items) =>

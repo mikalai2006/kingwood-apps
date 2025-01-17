@@ -39,7 +39,7 @@ export default function RoomScreen() {
           onPress={() => router.push("/create")}
         />
       </View> */}
-      {!messageRooms.length ? (
+      {!messageRooms?.length ? (
         <View></View>
       ) : (
         <FlatList

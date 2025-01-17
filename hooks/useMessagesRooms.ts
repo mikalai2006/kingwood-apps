@@ -99,7 +99,7 @@ const useMessagesRooms = (props: IuseMessagesRoomsProps) => {
               if (!ignore) {
                 // console.log("useMessagesRooms response: ", response);
 
-                const responseData = response;
+                const responseData = response.data;
                 if (!responseData) {
                   // dispatch(setActiveNode(null));
                   // setProducts([]);
@@ -109,9 +109,7 @@ const useMessagesRooms = (props: IuseMessagesRoomsProps) => {
                   return;
                 }
 
-                const responseItems = responseData.data;
-
-                const listDataForRealm = responseItems.map((x) => {
+                const listDataForRealm = responseData.map((x) => {
                   return {
                     ...x,
                     _id: new BSON.ObjectId(x.id),
@@ -119,7 +117,7 @@ const useMessagesRooms = (props: IuseMessagesRoomsProps) => {
                 });
 
                 // console.log("listDataForRealm: ", listDataForRealm);
-                if (listDataForRealm.length) {
+                if (listDataForRealm?.length) {
                   realm.write(() => {
                     try {
                       for (

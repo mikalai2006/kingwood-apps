@@ -37,6 +37,7 @@ import { BSON, UpdateMode } from "realm";
 import dayjs from "@/utils/dayjs";
 import { useTranslation } from "react-i18next";
 import { TaskWorkerNotifyActiveTaskNo } from "./TaskWorkerNotifyActiveTaskNo";
+import { useTaskWorkerUtils } from "@/hooks/useTaskWorkerUtils";
 
 export type TaskWorkerNotifyProps = {
   short?: boolean;
@@ -47,257 +48,19 @@ export function TaskWorkerNotify({ short }: TaskWorkerNotifyProps) {
 
   const { t } = useTranslation();
 
-  const dispatch = useAppDispatch();
-
-  const userFromStore = useAppSelector(user);
-
-  const { onFetchWithAuth } = useFetchWithAuth();
+  // const userFromStore = useAppSelector(user);
 
   const workTimeFromStore = useAppSelector(workTime);
 
-  const realm = useRealm();
+  // const allWorkTime = useQuery(WorkTimeSchema);
 
-  const allWorkTime = useQuery(WorkTimeSchema);
-
-  const allOrders = useQuery(OrderSchema);
-
-  const currentWorkTime = useMemo(() => {
-    return allWorkTime.find((x) => x._id.toString() === workTimeFromStore?.id);
-  }, []);
+  // const currentWorkTime = useMemo(() => {
+  //   return allWorkTime.find((x) => x._id.toString() === workTimeFromStore?.id);
+  // }, []);
 
   const activeTaskWorkerFromStore = useAppSelector(activeTaskWorker);
-  // const timeWorkStartFromStore = useAppSelector(timeWorkStart);
-  // const timeWorkEndFromStore = useAppSelector(timeWorkEnd);
 
-  const allTaskStatus = useQuery(TaskStatusSchema);
-
-  // const activeTaskStatus = useObject(
-  //   TaskStatusSchema,
-  //   new BSON.ObjectId(activeTaskWorkerFromStore?.statusId)
-  // );
-  // const user = useObject(UserSchema, new BSON.ObjectId(task.userId));
-
-  const [loading, setLoading] = useState(false);
-
-  const onStartPrevTask = async () => {
-    const _status = allTaskStatus.find((x) => x.status === "process");
-    if (!_status) {
-      return;
-    }
-
-    await onFetchWithAuth(
-      `${hostAPI}/task_worker/${activeTaskWorkerFromStore?.id}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify({
-          // statusId: "6749ffe3d6b4324345382aed",
-          statusId: _status._id.toString(),
-          status: _status.status,
-        }),
-      }
-    )
-      .then((res) => res.json())
-      .then((res: ITaskWorker) => {
-        try {
-          console.log("onEndWorkTime res: ", res);
-
-          realm.write(() => {
-            if (res.id) {
-              realm.create(
-                "TaskWorkerSchema",
-                {
-                  ...res,
-                  _id: new BSON.ObjectId(res.id),
-                  sortOrder: res.sortOrder || 0,
-                },
-                UpdateMode.Modified
-              );
-            }
-          });
-
-          dispatch(setActiveTaskWorker(res));
-        } catch (e) {
-          console.log("onEndWorkTime error: ", e);
-        }
-      })
-      .catch((e) => {
-        console.log("onEndWorkTime Error", e);
-      })
-      .finally(() => {
-        setLoading(false);
-        // dispatch(clearTimeWork());
-      });
-  };
-
-  const onEndWorkTime = async () => {
-    const _status = allTaskStatus.find((x) => x.status === "pause");
-    if (!_status || workTimeFromStore === null) {
-      return;
-    }
-    // console.log("onEndWorkTime:", activeTaskWorkerFromStore);
-
-    setLoading(true);
-    // dispatch(setTimeWorkEnd(new Date().getTime()));
-    await onFetchWithAuth(
-      `${hostAPI}/task_worker/${activeTaskWorkerFromStore?.id}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify({
-          // statusId: "6749ffe3d6b4324345382aed",
-          statusId: _status._id.toString(),
-          status: _status.status,
-        }),
-      }
-    )
-      .then((res) => res.json())
-      .then((res: ITaskWorker) => {
-        try {
-          console.log("onEndWorkTime res: ", res);
-
-          realm.write(() => {
-            if (res.id) {
-              realm.create(
-                "TaskWorkerSchema",
-                {
-                  ...res,
-                  _id: new BSON.ObjectId(res.id),
-                  sortOrder: res.sortOrder || 0,
-                },
-                UpdateMode.Modified
-              );
-              dispatch(setActiveTaskWorker(res));
-            }
-          });
-        } catch (e) {
-          console.log("onEndWorkTime error: ", e);
-        }
-      })
-      .catch((e) => {
-        console.log("onEndWorkTime Error", e);
-      })
-      .finally(() => {
-        setLoading(false);
-        // dispatch(clearTimeWork());
-      });
-
-    const timeDate = dayjs(new Date()).utc();
-
-    await onFetchWithAuth(`${hostAPI}/work_time/${workTimeFromStore}`, {
-      method: "PATCH",
-      body: JSON.stringify({
-        // statusId: "6749ffe3d6b4324345382aed",
-        to: timeDate.format(),
-      }),
-    })
-      .then((res) => res.json())
-      .then((res: IWorkTime) => {
-        try {
-          console.log("onEndWorkTime res: ", res);
-
-          realm.write(() => {
-            if (res.id) {
-              realm.create(
-                "WorkTimeSchema",
-                {
-                  ...res,
-                  _id: new BSON.ObjectId(res.id),
-                },
-                UpdateMode.Modified
-              );
-            }
-            // dispatch(setActiveTaskWorker(null));
-            dispatch(setWorkTime(null));
-          });
-        } catch (e) {
-          console.log("onEndWorkTime error: ", e);
-        }
-      })
-      .catch((e) => {
-        console.log("onEndWorkTime Error", e);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  const onStartWorkTime = async () => {
-    if (!userFromStore) {
-      return;
-    }
-    setLoading(true);
-
-    const timeDate = dayjs(new Date()).utc();
-
-    await onFetchWithAuth(`${hostAPI}/work_time`, {
-      method: "POST",
-      body: JSON.stringify({
-        workerId: userFromStore.id,
-        from: timeDate.format(),
-        // status: _status.status,
-      }),
-    })
-      .then((res) => res.json())
-      .then((res: IWorkTime) => {
-        try {
-          console.log("onStartWorkTime res: ", res);
-
-          realm.write(() => {
-            if (res.id) {
-              realm.create(
-                "WorkTimeSchema",
-                {
-                  ...res,
-                  _id: new BSON.ObjectId(res.id),
-                },
-                UpdateMode.Modified
-              );
-            }
-          });
-
-          dispatch(setWorkTime(res));
-        } catch (e) {
-          console.log("onStartWorkTime error: ", e);
-        }
-      })
-      .catch((e) => {
-        console.log("onStartWorkTime Error", e);
-      })
-      .finally(() => {
-        setLoading(false);
-
-        const orders = allOrders.filtered(
-          "_id=$0",
-          new BSON.ObjectId(activeTaskWorkerFromStore?.orderId)
-        );
-
-        if (orders.length) {
-          Alert.alert(
-            t("info.loadPrevTask"),
-            t("info.loadPrevTaskDescription", { orderName: orders[0]?.name }),
-            [
-              // {
-              //   text: "Ask me later",
-              //   onPress: () => console.log("Ask me later pressed"),
-              // },
-              {
-                text: t("button.no"),
-                onPress: () => {
-                  dispatch(setActiveTaskWorker(null));
-                },
-                style: "cancel",
-              },
-              {
-                text: t("button.yes"),
-                onPress: () => {
-                  onStartPrevTask();
-                },
-              },
-            ]
-          );
-        }
-        // dispatch(setTimeWorkStart(timeDate.millisecond()));
-      });
-  };
+  const { loading, onEndWorkTime, onStartWorkTime } = useTaskWorkerUtils();
 
   return (
     <View className="flex gap-4">
@@ -328,7 +91,7 @@ export function TaskWorkerNotify({ short }: TaskWorkerNotifyProps) {
         <View>
           {workTimeFromStore !== null ? (
             <UIButton
-              type="secondary"
+              type="primary"
               text={t("button.endWorkTime")}
               loading={loading}
               onPress={() => {

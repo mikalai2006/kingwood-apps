@@ -8,7 +8,7 @@ import { user } from "@/store/storeSlice";
 import { useQuery } from "@realm/react";
 import { TaskWorkerSchema } from "@/schema";
 import { SSkeleton } from "../ui/SSkeleton";
-import { TaskWorkerItem } from "./TaskWorkItem";
+import { TaskWorkerItem } from "./TaskWorkerItem";
 import dayjs from "@/utils/dayjs";
 import TaskNotFound from "./TaskNotFound";
 import Card from "../Card";

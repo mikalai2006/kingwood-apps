@@ -12,3 +12,5 @@ export * from "./PostSchema";
 export * from "./WorkTimeSchema";
 export * from "./TaskMontajSchema";
 export * from "./TaskMontajWorkerSchema";
+export * from "./WorkHistorySchema";
+export * from "./NotifySchema";

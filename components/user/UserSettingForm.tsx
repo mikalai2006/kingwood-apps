@@ -110,7 +110,83 @@ const UserSettingForm = () => {
 
   //   setMyBirthday(newText);
   // };
+  function maskBirthday(text: string) {
+    const value = text.replace(/\D+/g, "");
+    const numberLength = 8;
 
+    let result = "";
+    for (let i = 0; i < value.length && i < numberLength; i++) {
+      console.log(i, value[i]);
+
+      switch (i) {
+        case 2:
+          result += ".";
+          break;
+        case 4:
+          result += ".";
+          break;
+        default:
+          break;
+      }
+      result += value[i];
+    }
+    return result;
+  }
+  const setMyMaskBirthday = (text: string) => {
+    const value = maskBirthday(text);
+    setMyBirthday(value);
+  };
+
+  const prefixNumber = (str: string) => {
+    if (str === "7") {
+      return "7 (";
+    }
+    if (str === "8") {
+      return "8 (";
+    }
+    if (str === "9") {
+      return "7 (9";
+    }
+    return "7 (";
+  };
+
+  function maskPhone(text: string) {
+    const value = text.replace(/\D+/g, "");
+    const numberLength = 11;
+
+    let result;
+    if (text.includes("+8") || text[0] === "8") {
+      result = "";
+    } else {
+      result = "+";
+    }
+
+    for (let i = 0; i < value.length && i < numberLength; i++) {
+      switch (i) {
+        case 0:
+          result += prefixNumber(value[i]);
+          continue;
+        case 4:
+          result += ") ";
+          break;
+        case 7:
+          result += "-";
+          break;
+        case 9:
+          result += "-";
+          break;
+        default:
+          break;
+      }
+      result += value[i];
+    }
+    return result;
+  }
+
+  const setMyMaskPhone = (text: string) => {
+    const value = maskPhone(text);
+    setMyPhone(value);
+  };
   return (
     <>
       <Card>
@@ -128,8 +204,9 @@ const UserSettingForm = () => {
         <View className="pt-8">
           <UIInput
             value={myBirthday}
-            onChangeText={setMyBirthday}
+            onChangeText={setMyMaskBirthday}
             keyboardType="numeric"
+            placeholder="15.12.1980"
             title={t("birthday")}
           />
         </View>
@@ -137,14 +214,12 @@ const UserSettingForm = () => {
         <View className="pt-8">
           <UIInput
             value={myPhone}
-            onChangeText={setMyPhone}
+            onChangeText={setMyMaskPhone}
             keyboardType="numeric"
+            placeholder="+7(916)586-86-10"
             title={t("phone")}
           />
         </View>
-        {/* <View className="mt-4">
-                    <UIInput title="Логин" text={userFromStore?.login} />
-                  </View> */}
         <View className="mt-4">
           <UIButton
             type="primary"

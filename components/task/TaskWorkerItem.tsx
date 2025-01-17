@@ -1,4 +1,4 @@
-import { Alert, Animated, Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import UIButton from "@/components/ui/UIButton";
 import { useColorScheme } from "nativewind";
 import {
@@ -9,32 +9,34 @@ import {
 } from "@/schema";
 import useTask from "@/hooks/useTask";
 import { TaskOrder } from "./TaskOrder";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useFetchWithAuth } from "@/hooks/useFetchWithAuth";
 import { hostAPI } from "@/utils/global";
 import { useObject, useQuery, useRealm } from "@realm/react";
 import { BSON, UpdateMode } from "realm";
-import SIcon from "../ui/SIcon";
-import { Easing } from "react-native-reanimated";
-import { Colors } from "@/utils/Colors";
-import { ITaskWorker } from "@/types";
+import { ITaskWorker, IWorkHistory } from "@/types";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   activeTaskWorker,
   setActiveTaskWorker,
   workTime,
   user,
+  workHistory,
+  setWorkHistory,
 } from "@/store/storeSlice";
 import { useTranslation } from "react-i18next";
 import TaskIcon from "./TaskIcon";
 import dayjs from "@/utils/dayjs";
+import { ObjectsSchema } from "@/schema/ObjectsSchema";
+import TaskNotFound from "./TaskNotFound";
+import { useWork } from "@/hooks/useWork";
 
-export type TaskWorkItemProps = {
+export type TaskWorkerItemProps = {
   // taskWorker: TaskWorkerSchema;
   taskWorkerId: string;
 };
 
-export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
+export function TaskWorkerItem({ taskWorkerId }: TaskWorkerItemProps) {
   const { colorScheme } = useColorScheme();
 
   const userFromStore = useAppSelector(user);
@@ -49,6 +51,8 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
 
   const workTimeFromStore = useAppSelector(workTime);
 
+  const workHistoryFromStore = useAppSelector(workHistory);
+
   const activeTaskFromStore = useAppSelector(activeTaskWorker);
 
   const taskWorker = useObject(
@@ -56,10 +60,11 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
     new BSON.ObjectId(taskWorkerId)
   );
 
-  useTask({ id: [taskWorker?.taskId] });
+  taskWorker?.taskId && useTask({ id: [taskWorker.taskId] });
 
   const allTaskStatus = useQuery(TaskStatusSchema);
   const allOrders = useQuery(OrderSchema);
+  const allObjects = useQuery(ObjectsSchema);
 
   const task = useObject(TaskSchema, new BSON.ObjectId(taskWorker?.taskId));
 
@@ -69,6 +74,83 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
   );
 
   const [loading, setLoading] = useState(false);
+
+  // const { onWriteWorkHistory } = useWork();
+
+  // const onWriteWorkHistory = async (
+  //   statusName: string,
+  //   taskWorker: ITaskWorker
+  // ) => {
+  //   if (["process"].includes(statusName)) {
+  //     await onFetchWithAuth(`${hostAPI}/work_history`, {
+  //       method: "POST",
+  //       body: JSON.stringify({
+  //         status: 0,
+  //         from: dayjs().utc().format(),
+  //         objectId: taskWorker?.objectId,
+  //         orderId: taskWorker?.orderId,
+  //         taskId: taskWorker?.taskId,
+  //         workerId: taskWorker?.workerId,
+  //         operationId: taskWorker?.task.operationId,
+  //       }),
+  //     })
+  //       .then((res) => res.json())
+  //       .then((res: IWorkHistory) => {
+  //         realm.write(() => {
+  //           try {
+  //             realm.create(
+  //               "WorkHistorySchema",
+  //               {
+  //                 ...res,
+  //                 _id: new BSON.ObjectId(res.id),
+  //               },
+  //               UpdateMode.Modified
+  //             );
+  //           } catch (e) {
+  //             console.log("onWriteWorkHistory error: ", e);
+  //           }
+  //         });
+
+  //         dispatch(setWorkHistory(res));
+  //       })
+  //       .catch((e) => {
+  //         console.log("onWriteWorkHistory Error", e);
+  //       });
+  //   } else {
+  //     await onFetchWithAuth(
+  //       `${hostAPI}/work_history/${workHistoryFromStore?.id}`,
+  //       {
+  //         method: "PATCH",
+  //         body: JSON.stringify({
+  //           status: 1,
+  //           to: dayjs().utc().format(),
+  //         }),
+  //       }
+  //     )
+  //       .then((res) => res.json())
+  //       .then((res: IWorkHistory) => {
+  //         realm.write(() => {
+  //           try {
+  //             realm.create(
+  //               "WorkHistorySchema",
+  //               {
+  //                 ...res,
+  //                 _id: new BSON.ObjectId(res.id),
+  //               },
+  //               UpdateMode.Modified
+  //             );
+
+  //             dispatch(setWorkHistory(null));
+  //           } catch (e) {
+  //             console.log("onWriteWorkHistory error: ", e);
+  //           }
+  //         });
+  //       })
+  //       .catch((e) => {
+  //         console.log("onWriteWorkHistory Error", e);
+  //       });
+  //   }
+  // };
 
   const toggleTaskWorker = async (statusName: string) => {
     setLoading(true);
@@ -117,6 +199,9 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
               // } else {
               //   dispatch(setActiveTaskWorker(null));
               // }
+
+              // _statusPause.status &&
+              //   onWriteWorkHistory(_statusPause.status, res);
             } catch (e) {
               console.log("toggleTask prev error: ", e);
             }
@@ -157,6 +242,8 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
             } else {
               dispatch(setActiveTaskWorker(null));
             }
+
+            // onWriteWorkHistory(statusName, res);
             // if (res.statusId === "6749ffa6d6b4324345382aec") {
             // } else {
             //   dispatch(setActiveTaskWorker(null));
@@ -188,6 +275,10 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
       "_id=$0",
       new BSON.ObjectId(task.orderId)
     );
+    const objects = allObjects.filtered(
+      "_id=$0",
+      new BSON.ObjectId(task.objectId)
+    );
 
     if (!orders.length) {
       return;
@@ -196,7 +287,7 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
     Alert.alert(
       t("info.taskPause"),
       t("info.taskPauseDescription", {
-        orderName: `№${orders[0]?.number}: ${orders[0]?.name}`,
+        orderName: `№${orders[0]?.number}: ${orders[0]?.name} (${objects[0].name})`,
       }),
       [
         // {
@@ -223,6 +314,10 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
       "_id=$0",
       new BSON.ObjectId(task.orderId)
     );
+    const objects = allObjects.filtered(
+      "_id=$0",
+      new BSON.ObjectId(task.objectId)
+    );
 
     if (!orders.length) {
       return;
@@ -232,11 +327,11 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
       t("info.taskProcess"),
       activeTaskFromStore != null
         ? t("info.taskProcessRunOtherDescription", {
-            orderName: `№${orders[0]?.number}: ${orders[0]?.name}`,
-            prevOrderName: `№${activeTaskFromStore.order?.number}: ${activeTaskFromStore.order?.name}`,
+            orderName: `№${orders[0]?.number}: ${orders[0]?.name} (${objects[0].name})`,
+            prevOrderName: `№${activeTaskFromStore.order?.number}: ${activeTaskFromStore.order?.name} (${activeTaskFromStore.object?.name})`,
           })
         : t("info.taskProcessDescription", {
-            orderName: `№${orders[0]?.number}: ${orders[0]?.name}`,
+            orderName: `№${orders[0]?.number}: ${orders[0]?.name} (${objects[0].name})`,
           }),
       [
         // {
@@ -300,12 +395,12 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
         className="rounded-lg shadow-lg bg-white dark:bg-s-800"
         // style={{ backgroundColor: taskStatus?.color }}
       >
-        <View className="rounded-t-lg border-b border-black/10 dark:border-black/10  p-2">
+        <View className="rounded-t-lg p-2 pb-0">
           <View className="px-1">
             <TaskOrder orderId={task.orderId} />
           </View>
         </View>
-        <View className="p-2 rounded-b-lg">
+        <View className="p-2 pt-0 rounded-b-lg">
           {/* <View style={{ aspectRatio: 1 }}>
           <RImage
             className="object-cover aspect-square"
@@ -359,7 +454,7 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
                         "day",
                         "[]"
                       ) ||
-                      !order?.stolyarComplete //activeTaskFromStore !== null ||
+                      order.status < 1 //!order?.stolyarComplete //activeTaskFromStore !== null ||
                     }
                     onPress={() => onProcessTask(task)}
                   ></UIButton>
@@ -390,7 +485,6 @@ export function TaskWorkerItem({ taskWorkerId }: TaskWorkItemProps) {
         </View>
       </View>
     </View>
-  ) : (
-    <Text>Not found task</Text>
-  );
+  ) : // <TaskNotFound />
+  null;
 }

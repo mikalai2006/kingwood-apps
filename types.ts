@@ -1,4 +1,5 @@
 import * as icons from "@/utils/icons";
+import { NetInfoState } from "@react-native-community/netinfo";
 
 export interface IWsMessage {
   type: string;
@@ -200,6 +201,22 @@ export type ITaskStatusInput = {
   [Property in keyof ITaskStatus]?: ITaskStatus[Property];
 };
 
+export interface INotify {
+  id: string;
+  userId: string;
+  userTo: string;
+  message: string;
+  status: number;
+  images: string[];
+
+  user?: IUser;
+  recepient?: IUser;
+
+  readAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface ITaskWorker {
   id: string;
   userId: string;
@@ -313,15 +330,43 @@ export type IUserInput = {
   [Property in keyof IUser]?: IUser[Property];
 };
 
-export interface IWorkTime {
+export interface IFinancyFilter {
+  year: number;
+  month: number;
+  monthText: string;
+  monthIndex: number;
+}
+
+export type TNetInfoState = {
+  [Property in keyof NetInfoState]?: NetInfoState[Property];
+};
+
+export interface IWorkHistory {
   id: string;
   userId: string;
+  objectId: string;
   orderId: string;
   taskId: string;
   workerId: string;
+  operationId: string;
   status: string;
   from: string;
   to: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IWorkTime {
+  id: string;
+  userId: string;
+  // orderId: string;
+  // taskId: string;
+  workerId: string;
+  status: string;
+  date: string;
+  from: string;
+  to: string;
+  oklad: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -357,4 +402,6 @@ export interface AppState {
   };
   activeTaskWorker: ITaskWorkerPopulate | null;
   workTime: IWorkTime | null;
+  workHistory: IWorkHistory | null;
+  financyFilter: IFinancyFilter;
 }

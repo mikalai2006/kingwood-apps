@@ -1,4 +1,4 @@
-package com.anonymous.swapland
+package com.anonymous.kingwood
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

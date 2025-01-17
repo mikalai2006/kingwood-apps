@@ -1,8 +1,11 @@
 import "react-native-get-random-values";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, StatusBar, Text, View } from "react-native";
 import "../localization/i18n";
-
+import NetInfo, {
+  NetInfoState,
+  NetInfoStateType,
+} from "@react-native-community/netinfo";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import "react-native-reanimated";
@@ -38,11 +41,18 @@ import {
   TaskStatusSchema,
   TaskWorkerSchema,
   UserSchema,
+  WorkHistorySchema,
   WorkTimeSchema,
+  NotifySchema,
 } from "@/schema";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TaskWorkerNotify } from "@/components/task/TaskWorkerNotify";
 import { ObjectsSchema } from "@/schema/ObjectsSchema";
+import { useTranslation } from "react-i18next";
+import { TNetInfoState } from "@/types";
+import React from "react";
+import { ErrContext } from "@/components/ErrContext";
+import UIButton from "@/components/ui/UIButton";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -81,6 +91,8 @@ function useNotificationObserver() {
 export default function RootLayout() {
   useNotificationObserver();
 
+  const { t } = useTranslation();
+
   const { colorScheme } = useColorScheme();
   // const tokensFromStore = useAppSelector(tokens);
 
@@ -93,6 +105,24 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  const [net, setNet] = useState<TNetInfoState>({
+    type: NetInfoStateType.none,
+    isConnected: false,
+  });
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      console.log("Connection type", state.type);
+      console.log("Is connected?", state.isConnected);
+      state && setNet({ ...state });
+    });
+
+    // To unsubscribe to these update, just use:
+    () => unsubscribe();
+  }, []);
+
+  const [err, setErr] = useState<Error | null>(null);
 
   if (!loaded) {
     return null;
@@ -116,6 +146,8 @@ export default function RootLayout() {
         WorkTimeSchema,
         TaskMontajSchema,
         TaskMontajWorkerSchema,
+        WorkHistorySchema,
+        NotifySchema,
       ]}
       inMemory
     >
@@ -129,34 +161,59 @@ export default function RootLayout() {
           }
           persistor={persistor}
         >
-          <WidgetInitApp />
-          <GestureHandlerRootView style={styles.root}>
-            <StatusBar translucent backgroundColor="transparent" />
-            <View style={styles.view} className="bg-s-200 dark:bg-s-950">
-              {/* <SafeAreaView style={{ flex: 1 }}> */}
-              {/* <View className="flex-none">
+          {net?.isConnected ? (
+            err != null ? (
+              <View className="bg-s-100 dark:bg-s-900 z-50 flex-1 items-center justify-center p-6">
+                <StatusBar translucent backgroundColor="transparent" />
+                <Text className="text-lg text-s-800 dark:text-s-200 leading-5 mb-6">
+                  {t(`${err?.message}`)}
+                </Text>
+                <UIButton
+                  type="primary"
+                  text={t("button.refreshSocket")}
+                  onPress={() => {
+                    setErr(null);
+                  }}
+                />
+              </View>
+            ) : (
+              <ErrContext.Provider value={{ err, setErr }}>
+                <View className="flex-1">
+                  <WidgetInitApp />
+                  <GestureHandlerRootView style={styles.root}>
+                    <StatusBar translucent backgroundColor="transparent" />
+                    <View
+                      style={styles.view}
+                      className="bg-s-200 dark:bg-s-950"
+                    >
+                      {/* <SafeAreaView style={{ flex: 1 }}> */}
+                      {/* <View className="flex-none">
                   <TaskWorkerNotify />
                 </View> */}
-              <Stack
-                // initialRouteName="auth"
-                screenOptions={{
-                  headerTitleAlign: "center",
-                  presentation: "fullScreenModal",
-                  headerStyle: {
-                    backgroundColor:
-                      colorScheme === "dark" ? Colors.s[950] : Colors.s[100],
-                  },
-                  headerTintColor:
-                    colorScheme === "dark" ? Colors.s[200] : Colors.s[800],
-                }}
-              >
-                {
-                  <Stack.Screen
-                    name="(tabs)"
-                    options={{ headerShown: false }}
-                  />
-                }
-                {/* <Stack.Screen
+                      <Stack
+                        // initialRouteName="auth"
+                        screenOptions={{
+                          headerTitleAlign: "center",
+                          presentation: "fullScreenModal",
+                          headerStyle: {
+                            backgroundColor:
+                              colorScheme === "dark"
+                                ? Colors.s[950]
+                                : Colors.s[100],
+                          },
+                          headerTintColor:
+                            colorScheme === "dark"
+                              ? Colors.s[200]
+                              : Colors.s[800],
+                        }}
+                      >
+                        {
+                          <Stack.Screen
+                            name="(tabs)"
+                            options={{ headerShown: false }}
+                          />
+                        }
+                        {/* <Stack.Screen
                   name="modalcategory"
                   options={{
                     title: "Выберите категорию",
@@ -165,16 +222,16 @@ export default function RootLayout() {
                     // headerShown: false,
                   }}
                 /> */}
-                <Stack.Screen
-                  name="modalpicker"
-                  options={{
-                    title: "Добавление изображения",
-                    // presentation: "transparentModal",
-                    // animation: "slide_from_right",
-                    // headerShown: false,
-                  }}
-                />
-                {/* <Stack.Screen
+                        <Stack.Screen
+                          name="modalpicker"
+                          options={{
+                            title: "Добавление изображения",
+                            // presentation: "transparentModal",
+                            // animation: "slide_from_right",
+                            // headerShown: false,
+                          }}
+                        />
+                        {/* <Stack.Screen
                   name="modalfilter"
                   options={{
                     title: "Настройка фильтра",
@@ -183,7 +240,7 @@ export default function RootLayout() {
                     // headerShown: false,
                   }}
                 /> */}
-                {/* <Stack.Screen
+                        {/* <Stack.Screen
                   name="modalsort"
                   options={{
                     title: "Настройка сортировки",
@@ -192,7 +249,7 @@ export default function RootLayout() {
                     // headerShown: false,
                   }}
                 /> */}
-                {/* <Stack.Screen
+                        {/* <Stack.Screen
                   name="product"
                   options={{
                     // presentation: "transparentModal",
@@ -200,7 +257,7 @@ export default function RootLayout() {
                     headerShown: false,
                   }}
                 /> */}
-                {/* <Stack.Screen
+                        {/* <Stack.Screen
                   name="user"
                   options={{
                     // presentation: "transparentModal",
@@ -208,15 +265,15 @@ export default function RootLayout() {
                     headerShown: false,
                   }}
                 /> */}
-                <Stack.Screen
-                  name="modalauth"
-                  options={{
-                    // presentation: "transparentModal",
-                    // animation: "slide_from_right",
-                    headerShown: false,
-                  }}
-                />
-                {/* <Stack.Screen
+                        <Stack.Screen
+                          name="modalauth"
+                          options={{
+                            // presentation: "transparentModal",
+                            // animation: "slide_from_right",
+                            headerShown: false,
+                          }}
+                        />
+                        {/* <Stack.Screen
                   name="modaloffer"
                   options={{
                     // title: "Предложение",
@@ -225,16 +282,25 @@ export default function RootLayout() {
                     headerShown: false,
                   }}
                 /> */}
-                <Stack.Screen
-                  name="usersettingform"
-                  options={{
-                    // title: "Предложение",
-                    // presentation: "transparentModal",
-                    // animation: "slide_from_right",
-                    headerShown: false,
-                  }}
-                />
-                {/* <Stack.Screen
+                        <Stack.Screen
+                          name="usersettingform"
+                          options={{
+                            // title: "Предложение",
+                            // presentation: "transparentModal",
+                            // animation: "slide_from_right",
+                            headerShown: false,
+                          }}
+                        />
+                        <Stack.Screen
+                          name="modaldatepicker"
+                          options={{
+                            title: t("modaldatepicker"),
+                            presentation: "transparentModal",
+                            animation: "slide_from_right",
+                            headerShown: true,
+                          }}
+                        />
+                        {/* <Stack.Screen
                   name="modaldarom"
                   options={{
                     // title: "Предложение",
@@ -243,7 +309,7 @@ export default function RootLayout() {
                     headerShown: false,
                   }}
                 /> */}
-                {/* <Stack.Screen
+                        {/* <Stack.Screen
                   name="modalquestion"
                   options={{
                     // title: "Вопросы",
@@ -252,7 +318,7 @@ export default function RootLayout() {
                     headerShown: false,
                   }}
                 /> */}
-                {/* <Stack.Screen
+                        {/* <Stack.Screen
                   name="address"
                   options={{
                     // title: "Вопросы",
@@ -261,7 +327,7 @@ export default function RootLayout() {
                     headerShown: false,
                   }}
                 /> */}
-                {/* <Stack.Screen
+                        {/* <Stack.Screen
                   name="mapaddaddress"
                   options={{
                     // title: "Вопросы",
@@ -270,7 +336,7 @@ export default function RootLayout() {
                     headerShown: false,
                   }}
                 /> */}
-                {/* <Stack.Screen
+                        {/* <Stack.Screen
                   name="mapfilter"
                   options={{
                     // title: "Вопросы",
@@ -280,15 +346,15 @@ export default function RootLayout() {
                   }}
                 /> */}
 
-                <Stack.Screen
-                  name="auth"
-                  options={{
-                    headerShown: false,
-                    // presentation: 'transparentModal',
-                    // animation: "slide_from_bottom",
-                  }}
-                />
-                {/* <Stack.Screen
+                        <Stack.Screen
+                          name="auth"
+                          options={{
+                            headerShown: false,
+                            // presentation: 'transparentModal',
+                            // animation: "slide_from_bottom",
+                          }}
+                        />
+                        {/* <Stack.Screen
                   name="modalmessage"
                   options={{
                     headerShown: false,
@@ -324,7 +390,7 @@ export default function RootLayout() {
                     // ),
                   }}
                 /> */}
-                {/* <Stack.Screen
+                        {/* <Stack.Screen
                   name="giveactions"
                   options={{
                     // headerShown: false,
@@ -345,13 +411,32 @@ export default function RootLayout() {
                     // ),
                   }}
                 /> */}
-                <Stack.Screen name="+not-found" />
-              </Stack>
-              {/* </SafeAreaView> */}
-            </View>
-          </GestureHandlerRootView>
-          <WidgetInitAuth />
-          <WidgetEvents />
+                        <Stack.Screen name="+not-found" />
+                      </Stack>
+                      {/* </SafeAreaView> */}
+                    </View>
+                  </GestureHandlerRootView>
+                  <WidgetInitAuth />
+                  <WidgetEvents />
+                </View>
+              </ErrContext.Provider>
+            )
+          ) : (
+            <GestureHandlerRootView style={styles.root}>
+              <StatusBar translucent backgroundColor="transparent" />
+              <SafeAreaView className="flex-1 bg-s-200 dark:bg-s-900">
+                <View className="flex-1 p-4">
+                  <Text className="text-xl font-bold mb-2 text-r-600 dark:text-r-300">
+                    {t("disconnectTitle")}
+                  </Text>
+                  <Text className="text-lg leading-5 text-r-800 dark:text-r-300">
+                    {t("disconnect")}
+                  </Text>
+                  <ActivityIndicator size={30} color={Colors.s[500]} />
+                </View>
+              </SafeAreaView>
+            </GestureHandlerRootView>
+          )}
         </PersistGate>
       </Provider>
     </RealmProvider>
